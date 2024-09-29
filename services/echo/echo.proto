@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/jbarrieault/grpc-demo/echo";
+
+package echo;
+
+service Echo {
+  // returns the message received
+  rpc Echo(EchoMessage) returns (EchoMessage) {}
+}
+
+message EchoMessage {
+  string value = 1;
+}
