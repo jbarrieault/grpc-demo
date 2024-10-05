@@ -50,7 +50,7 @@ func main() {
 		input, _ := reader.ReadString('\n')
 		message.Value = input
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		resp, err := client.Echo(ctx, &message)
 		cancel()
 		if err != nil {
