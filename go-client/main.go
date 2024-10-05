@@ -32,9 +32,6 @@ func main() {
 
 	client := pb.NewEchoClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
@@ -53,7 +50,9 @@ func main() {
 		input, _ := reader.ReadString('\n')
 		message.Value = input
 
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		resp, err := client.Echo(ctx, &message)
+		cancel()
 		if err != nil {
 			log.Fatalf("Echo service error: %v", err)
 		}
