@@ -12,7 +12,9 @@ type staticResolver struct {
 	target    resolver.Target
 }
 
-func (r *staticResolver) ResolveNow(_ resolver.ResolveNowOptions) {
+func (r *staticResolver) ResolveNow(resolver.ResolveNowOptions) {}
+
+func (r *staticResolver) start() {
 	r.conn.UpdateState(resolver.State{Addresses: r.addresses})
 }
 
@@ -33,7 +35,7 @@ func (b *staticResolverBuilder) Build(target resolver.Target, conn resolver.Clie
 		addresses: b.addresses,
 	}
 
-	r.ResolveNow(resolver.ResolveNowOptions{})
+	r.start()
 	return r, nil
 }
 
