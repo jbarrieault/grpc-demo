@@ -17,14 +17,19 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "localhost:3000", "The remote server address, as host:post")
+	addr = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s) address, as host:post")
 )
 
 func main() {
+	flag.Parse()
+
+	registerStaticResolver()
+
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`))
 
-	conn, err := grpc.NewClient(*addr, opts...)
+	conn, err := grpc.NewClient("static:///i-believe-this-is-ignored-and-the-resolver-takes-over?", opts...)
 	if err != nil {
 		log.Fatalf("Failed to connect to Echo Service: %s", err)
 	}
@@ -50,13 +55,13 @@ func main() {
 		input, _ := reader.ReadString('\n')
 		message.Value = input
 
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		resp, err := client.Echo(ctx, &message)
 		cancel()
 		if err != nil {
 			log.Fatalf("Echo service error: %v", err)
 		}
 
-		log.Printf("Response: %v", resp.Value)
+		fmt.Printf(resp.Value)
 	}
 }

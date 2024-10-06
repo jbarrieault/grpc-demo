@@ -2,14 +2,17 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
-	"time"
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
+)
+
+var (
+	port = flag.String("p", "3000", "port to listen on")
 )
 
 type echoServer struct {
@@ -18,17 +21,20 @@ type echoServer struct {
 
 func (*echoServer) Echo(_ context.Context, message *pb.EchoMessage) (*pb.EchoMessage, error) {
 	log.Printf("Received Echo: %v", message.GetValue())
-	simulatedLatency := rand.Intn(10)
-	if simulatedLatency >= 4 {
-		fmt.Println("simulating a network hiccup causing increased latency...")
-		time.Sleep(time.Duration(simulatedLatency) * time.Second)
-	}
+	// simulatedLatency := rand.Intn(10)
+	// if simulatedLatency >= 4 {
+	// 	fmt.Println("simulating a network hiccup causing increased latency...")
+	// 	time.Sleep(time.Duration(simulatedLatency) * time.Second)
+	// }
 
-	return &pb.EchoMessage{Value: message.GetValue()}, nil
+	respMsg := fmt.Sprintf("Server at port %v: %v", *port, message.GetValue())
+	return &pb.EchoMessage{Value: respMsg}, nil
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":3000")
+	flag.Parse()
+
+	lis, err := net.Listen("tcp", ":"+*port)
 	if err != nil {
 		log.Fatalf("net.Listen: %v", err)
 	}
@@ -36,7 +42,7 @@ func main() {
 	s := grpc.NewServer()
 	pb.RegisterEchoServer(s, &echoServer{})
 
-	log.Println("Echo Service listening on port 3000")
+	log.Printf("Echo Service listening on port %v", *port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
