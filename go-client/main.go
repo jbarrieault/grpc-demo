@@ -20,11 +20,12 @@ var (
 	addr = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s) address, as host:post")
 )
 
-func main() {
+func init() {
 	flag.Parse()
-
 	registerStaticResolver()
+}
 
+func main() {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`))
