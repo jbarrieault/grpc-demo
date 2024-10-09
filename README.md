@@ -28,7 +28,6 @@ Enter some messages and you will see responses coming from each server in round-
 
 ## TODO
 
-- [ ] create a `Context.context` per client
 - [ ] play with retry config
 - [ ] add a logging interceptor
 - [ ] streaming server/client demo
