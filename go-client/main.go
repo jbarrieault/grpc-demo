@@ -47,7 +47,7 @@ func main() {
 		input, _ := reader.ReadString('\n')
 		output, err := echo(input, &message, client)
 		if err != nil {
-			log.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
 
@@ -58,9 +58,10 @@ func main() {
 func echo(input string, message *pb.EchoMessage, client pb.EchoClient) (string, error) {
 	message.Value = input
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	resp, err := client.Echo(ctx, message)
-	cancel()
 	if err != nil {
 		return "", err
 	}

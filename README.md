@@ -28,8 +28,8 @@ Enter some messages and you will see responses coming from each server in round-
 
 ## TODO
 
-- [ ] play with retry config
 - [ ] add a logging interceptor
+- [ ] play with retry config
 - [ ] streaming server/client demo
 - [ ] a ruby client
 - [ ] demo proto schema evolution
