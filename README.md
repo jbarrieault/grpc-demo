@@ -28,7 +28,6 @@ Enter some messages and you will see responses coming from each server in round-
 
 ## TODO
 
-- [ ] add a logging interceptor
 - [ ] play with retry config
 - [ ] auth?
 - [ ] streaming server/client demo
