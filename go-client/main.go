@@ -23,6 +23,7 @@ var (
 func init() {
 	flag.Parse()
 	registerStaticResolver()
+	setupSignalHandler()
 }
 
 func main() {
@@ -37,15 +38,6 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewEchoClient(conn)
-
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		<-sigChan
-		fmt.Println("\nGoobye.")
-		os.Exit(0)
-	}()
 
 	message := pb.EchoMessage{}
 	reader := bufio.NewReader(os.Stdin)
@@ -65,4 +57,15 @@ func main() {
 
 		fmt.Printf(resp.Value)
 	}
+}
+
+func setupSignalHandler() {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		fmt.Println("\nGoodbye.")
+		os.Exit(0)
+	}()
 }
