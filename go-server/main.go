@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
+	"time"
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
@@ -21,11 +23,11 @@ type echoServer struct {
 
 func (*echoServer) Echo(_ context.Context, message *pb.EchoMessage) (*pb.EchoMessage, error) {
 	log.Printf("Received Echo: %v", message.GetValue())
-	// simulatedLatency := rand.Intn(10)
-	// if simulatedLatency >= 4 {
-	// 	fmt.Println("simulating a network hiccup causing increased latency...")
-	// 	time.Sleep(time.Duration(simulatedLatency) * time.Second)
-	// }
+	simulatedLatency := rand.Intn(6)
+	if simulatedLatency >= 5 {
+		fmt.Println("simulating a network hiccup causing increased latency...")
+		time.Sleep(time.Duration(simulatedLatency) * time.Second)
+	}
 
 	respMsg := fmt.Sprintf("Server at port %v: %v", *port, message.GetValue())
 	return &pb.EchoMessage{Value: respMsg}, nil

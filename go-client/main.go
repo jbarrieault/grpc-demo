@@ -38,7 +38,6 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewEchoClient(conn)
-
 	message := pb.EchoMessage{}
 	reader := bufio.NewReader(os.Stdin)
 
@@ -46,17 +45,27 @@ func main() {
 
 	for {
 		input, _ := reader.ReadString('\n')
-		message.Value = input
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		resp, err := client.Echo(ctx, &message)
-		cancel()
+		output, err := echo(input, &message, client)
 		if err != nil {
-			log.Fatalf("Echo service error: %v", err)
+			log.Println(err)
+			continue
 		}
 
-		fmt.Printf(resp.Value)
+		fmt.Println(output)
 	}
+}
+
+func echo(input string, message *pb.EchoMessage, client pb.EchoClient) (string, error) {
+	message.Value = input
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	resp, err := client.Echo(ctx, message)
+	cancel()
+	if err != nil {
+		return "", err
+	}
+
+	return resp.Value, nil
 }
 
 func setupSignalHandler() {
