@@ -24,3 +24,13 @@ cd go-client && go run . -addr localhost:3000,localhost:3001,localhost:3002
 ```
 
 Enter some messages and you will see responses coming from each server in round-robin fashion, skipping servers that it cannot establish connection to (due to invalid address, network partition, etc.)
+
+
+## TODO
+
+- [ ] create a `Context.context` per client
+- [ ] play with retry config
+- [ ] add a logging interceptor
+- [ ] streaming server/client demo
+- [ ] a ruby client
+- [ ] demo proto schema evolution
