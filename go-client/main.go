@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -30,6 +31,7 @@ func main() {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`))
+	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
 
 	conn, err := grpc.NewClient("static:///i-believe-this-is-ignored-and-the-resolver-takes-over?", opts...)
 	if err != nil {
@@ -45,7 +47,9 @@ func main() {
 
 	for {
 		input, _ := reader.ReadString('\n')
+		input = strings.TrimSuffix(input, "\n")
 		output, err := echo(input, &message, client)
+
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue

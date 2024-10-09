@@ -30,6 +30,7 @@ Enter some messages and you will see responses coming from each server in round-
 
 - [ ] add a logging interceptor
 - [ ] play with retry config
+- [ ] auth?
 - [ ] streaming server/client demo
 - [ ] a ruby client
 - [ ] demo proto schema evolution
