@@ -11,10 +11,14 @@ import (
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
-	port = flag.String("p", "3000", "port to listen on")
+	port     = flag.String("p", "3000", "port to listen on")
+	errRate  = flag.Int("e", 0, "percentage of calls that will error")
+	slowRate = flag.Int("s", 0, "percentage of (non error) calls that be slow")
 )
 
 type echoServer struct {
@@ -24,8 +28,13 @@ type echoServer struct {
 func (*echoServer) Echo(_ context.Context, message *pb.EchoMessage) (*pb.EchoMessage, error) {
 	log.Printf("Received Echo: %v", message.GetValue())
 
-	if rand.Intn(10) == 9 {
-		fmt.Println("simulating a network hiccup causing increased latency...")
+	if *errRate > 0 && *errRate >= rand.Intn(100) {
+		fmt.Println("Simulating an UNAVAILABLE error")
+		return nil, status.Errorf(codes.Unavailable, "Service unavailable (simulated)")
+	}
+
+	if *slowRate > 0 && *slowRate >= rand.Intn(100) {
+		fmt.Println("Simulating slow request")
 		time.Sleep(time.Duration(3) * time.Second)
 	}
 
