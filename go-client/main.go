@@ -18,7 +18,20 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s) address, as host:post")
+	addr          = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s) address, as host:post")
+	serviceConfig = `{
+			"methodConfig": [{
+				"name": [{"service": "echo.Echo"}],
+				"retryPolicy": {
+					"MaxAttempts": 4,
+					"InitialBackoff": "1.00s",
+					"MaxBackoff": "20.0s",
+					"BackoffMultiplier": 2,
+					"RetryableStatusCodes": [ "UNAVAILABLE" ]
+				}
+			}],
+			"loadBalancingConfig": [{"round_robin":{}}]
+		}`
 )
 
 func init() {
@@ -30,8 +43,8 @@ func init() {
 func main() {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`))
 	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
+	opts = append(opts, grpc.WithDefaultServiceConfig(serviceConfig))
 
 	conn, err := grpc.NewClient("static:///i-believe-this-is-ignored-and-the-resolver-takes-over?", opts...)
 	if err != nil {
