@@ -18,6 +18,11 @@ go run . -p 3001 &
 go run . -p 3002 &
 ```
 
+The `go-server` also takes flags for simulating errors and latency. The following will start an EchoService server for which 5% of calls will produce an error, and 20% of (non-erroring) calls will be slow:
+```
+go run . -p 3000 -e 5 -s 20
+```
+
 Then start an echo service client, passing the addresses of the servers you started:
 ```shell
 cd go-client && go run . -addr localhost:3000,localhost:3001,localhost:3002
@@ -28,8 +33,8 @@ Enter some messages and you will see responses coming from each server in round-
 
 ## TODO
 
-- [ ] play with retry config
 - [ ] auth?
 - [ ] streaming server/client demo
 - [ ] a ruby client
 - [ ] demo proto schema evolution
+
