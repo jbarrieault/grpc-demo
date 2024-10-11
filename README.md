@@ -33,8 +33,12 @@ Enter some messages and you will see responses coming from each server in round-
 
 ## TODO
 
+- [ ] make a non-static resolver
+ - [/] build an in-memory registry
+  - [ ] add tests
+  - [ ] extract to its own process, exposed over unix socket
 - [ ] auth?
 - [ ] streaming server/client demo
+- [ ] explore retry observability/metrics
 - [ ] a ruby client
 - [ ] demo proto schema evolution
-

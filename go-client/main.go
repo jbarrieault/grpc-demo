@@ -41,6 +41,12 @@ func init() {
 }
 
 func main() {
+	// r := NewRegistery()
+	// err := r.Register("echo", strings.Split(*addr, ",")...)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
