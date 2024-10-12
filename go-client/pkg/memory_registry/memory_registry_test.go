@@ -5,9 +5,10 @@ import "testing"
 func TestMemoryRegistry(t *testing.T) {
 	r := NewRegistery()
 	r.Register("test_service", "localhost:9999", "localhost:3333")
+	r.Register("another_service", "localhost:3232")
 
-	if len(r.services) != 1 {
-		t.Errorf("expected registry to have 1 service, have '%d'", len(r.services))
+	if len(r.services) != 2 {
+		t.Errorf("expected registry to have 2 services, has '%d'", len(r.services))
 	}
 
 	s, err := r.GetService("test_service")
