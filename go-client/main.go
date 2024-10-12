@@ -12,6 +12,8 @@ import (
 	"syscall"
 	"time"
 
+	// mr "github.com/jbarrieault/grpc-demo/go-client/pkg/memory_registry"
+
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -41,7 +43,7 @@ func init() {
 }
 
 func main() {
-	// r := NewRegistery()
+	// r := mr.NewRegistery()
 	// err := r.Register("echo", strings.Split(*addr, ",")...)
 	// if err != nil {
 	// 	log.Println(err)

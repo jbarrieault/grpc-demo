@@ -1,4 +1,4 @@
-package main
+package memory_registry
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ type Service struct {
 
 type Address string
 
-func (r *MemoryRegistry) buildService(name string, addrs ...string) *Service {
+func (r *MemoryRegistry) newService(name string, addrs ...string) *Service {
 	addresses := make([]Address, len(addrs))
 	for i, addr := range addrs {
 		addresses[i] = Address(addr)
@@ -37,7 +37,7 @@ func (r *MemoryRegistry) buildService(name string, addrs ...string) *Service {
 }
 
 func (r *MemoryRegistry) Register(name string, addrs ...string) error {
-	s := r.buildService(name, addrs...)
+	s := r.newService(name, addrs...)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
