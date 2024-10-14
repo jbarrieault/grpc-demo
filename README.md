@@ -33,12 +33,13 @@ Enter some messages and you will see responses coming from each server in round-
 
 ## TODO
 
-- [ ] make a non-static resolver
- - [/] build an in-memory registry
-  - [ ] add tests
-  - [ ] extract to its own process, exposed over unix socket
+- [X] build an (in-memory) service registry
+- [X] create a non-static resolver using a service registry
+- [ ] extract service to its own module/process, exposed over unix socket
+  - [ ] auto-register go-server instances to the registry
+  - [ ] why not hand-roll a binary protocol for transport while we're at it?
 - [ ] auth?
 - [ ] streaming server/client demo
-- [ ] explore retry observability/metrics
+- [ ] explore observability/metrics
 - [ ] a ruby client
 - [ ] demo proto schema evolution

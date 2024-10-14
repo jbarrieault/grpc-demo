@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	// mr "github.com/jbarrieault/grpc-demo/go-client/pkg/memory_registry"
+	mr "github.com/jbarrieault/grpc-demo/go-client/pkg/memory_registry"
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
@@ -34,27 +34,28 @@ var (
 			}],
 			"loadBalancingConfig": [{"round_robin":{}}]
 		}`
+	mem_reg *mr.MemoryRegistry
 )
 
 func init() {
 	flag.Parse()
-	registerStaticResolver()
 	setupSignalHandler()
+	initMemoryRegistry()
+	registerRegistryResolver()
+	registerStaticResolver()
 }
 
 func main() {
-	// r := mr.NewRegistery()
-	// err := r.Register("echo", strings.Split(*addr, ",")...)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
 	opts = append(opts, grpc.WithDefaultServiceConfig(serviceConfig))
 
-	conn, err := grpc.NewClient("static:///i-believe-this-is-ignored-and-the-resolver-takes-over?", opts...)
+	// 'static://' scheme is handled by static_resolver, which uses a hard-coded list of addresses
+	// conn, err := grpc.NewClient("static:///this-part-doesnt-matter-because-the-static-resolver-is-static", opts...)
+
+	// the registry schema is handled by registry_resolver, which looks up address from a an in-memory service registry
+	conn, err := grpc.NewClient("registry:///echo.Echo", opts...)
 	if err != nil {
 		log.Fatalf("Failed to connect to Echo Service: %s", err)
 	}
@@ -103,4 +104,16 @@ func setupSignalHandler() {
 		fmt.Println("\nGoodbye.")
 		os.Exit(0)
 	}()
+}
+
+// TODO: It would be fun to extract the registry
+// to its own process, exposed over a socket.
+// the go-server program could register itself on startup,
+// which would much closer to a real-world setup.
+func initMemoryRegistry() {
+	mem_reg = mr.NewRegistery()
+	err := mem_reg.Register("echo.Echo", strings.Split(*addr, ",")...)
+	if err != nil {
+		log.Println(err)
+	}
 }
