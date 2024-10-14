@@ -7,16 +7,11 @@ import (
 )
 
 type staticResolver struct {
+	cc        resolver.ClientConn
 	addresses []resolver.Address
-	conn      resolver.ClientConn
-	target    resolver.Target
 }
 
 func (r *staticResolver) ResolveNow(resolver.ResolveNowOptions) {}
-
-func (r *staticResolver) start() {
-	r.conn.UpdateState(resolver.State{Addresses: r.addresses})
-}
 
 func (r *staticResolver) Close() {}
 
@@ -28,14 +23,10 @@ func (b *staticResolverBuilder) Scheme() string {
 	return "static"
 }
 
-func (b *staticResolverBuilder) Build(target resolver.Target, conn resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	r := &staticResolver{
-		target:    target,
-		conn:      conn,
-		addresses: b.addresses,
-	}
+func (b *staticResolverBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+	r := &staticResolver{cc, b.addresses}
+	r.cc.UpdateState(resolver.State{Addresses: b.addresses})
 
-	r.start()
 	return r, nil
 }
 
