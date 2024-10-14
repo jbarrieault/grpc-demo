@@ -12,20 +12,20 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 
 Start multiple instance of the echo service:
 ```shell
-cd go-server
+cd unary-echo-server
 go run . -p 3000 &
 go run . -p 3001 &
 go run . -p 3002 &
 ```
 
-The `go-server` also takes flags for simulating errors and latency. The following will start an EchoService server for which 5% of calls will produce an error, and 20% of (non-erroring) calls will be slow:
+The `unary-echo-server` also takes flags for simulating errors and latency. The following will start an EchoService server for which 5% of calls will produce an error, and 20% of (non-erroring) calls will be slow:
 ```
 go run . -p 3000 -e 5 -s 20
 ```
 
 Then start an echo service client, passing the addresses of the servers you started:
 ```shell
-cd go-client && go run . -addr localhost:3000,localhost:3001,localhost:3002
+cd unary-echo-client && go run . -addr localhost:3000,localhost:3001,localhost:3002
 ```
 
 Enter some messages and you will see responses coming from each server in round-robin fashion, skipping servers that it cannot establish connection to (due to invalid address, network partition, etc.)
@@ -36,7 +36,8 @@ Enter some messages and you will see responses coming from each server in round-
 - [X] build an (in-memory) service registry
 - [X] create a non-static resolver using a service registry
 - [ ] extract service to its own module/process, exposed over unix socket
-  - [ ] auto-register go-server instances to the registry
+  - [ ] implement notifications that push to connected clients on service state changes
+  - [ ] auto-register unary-echo-server instances to the registry
   - [ ] why not hand-roll a binary protocol for transport while we're at it?
 - [ ] auth?
 - [ ] streaming server/client demo
