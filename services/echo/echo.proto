@@ -5,10 +5,17 @@ option go_package = "github.com/jbarrieault/grpc-demo/services/echo";
 package echo;
 
 service Echo {
-  // returns the message received
+  // Returns the message received
   rpc Echo(EchoMessage) returns (EchoMessage) {}
+  // Streams the messages received N times
+  rpc EchoN(EchoNMessage) returns (stream EchoNMessage);
 }
 
 message EchoMessage {
   string value = 1;
+}
+
+message EchoNMessage {
+  string value = 1;
+  int32 n = 2;
 }

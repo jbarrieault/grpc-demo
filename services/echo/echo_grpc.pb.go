@@ -19,15 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Echo_Echo_FullMethodName = "/echo.Echo/Echo"
+	Echo_Echo_FullMethodName  = "/echo.Echo/Echo"
+	Echo_EchoN_FullMethodName = "/echo.Echo/EchoN"
 )
 
 // EchoClient is the client API for Echo service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EchoClient interface {
-	// returns the message received
 	Echo(ctx context.Context, in *EchoMessage, opts ...grpc.CallOption) (*EchoMessage, error)
+	EchoN(ctx context.Context, in *EchoNMessage, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EchoNMessage], error)
 }
 
 type echoClient struct {
@@ -48,12 +49,31 @@ func (c *echoClient) Echo(ctx context.Context, in *EchoMessage, opts ...grpc.Cal
 	return out, nil
 }
 
+func (c *echoClient) EchoN(ctx context.Context, in *EchoNMessage, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EchoNMessage], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Echo_ServiceDesc.Streams[0], Echo_EchoN_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[EchoNMessage, EchoNMessage]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Echo_EchoNClient = grpc.ServerStreamingClient[EchoNMessage]
+
 // EchoServer is the server API for Echo service.
 // All implementations must embed UnimplementedEchoServer
 // for forward compatibility.
 type EchoServer interface {
-	// returns the message received
 	Echo(context.Context, *EchoMessage) (*EchoMessage, error)
+	EchoN(*EchoNMessage, grpc.ServerStreamingServer[EchoNMessage]) error
 	mustEmbedUnimplementedEchoServer()
 }
 
@@ -66,6 +86,9 @@ type UnimplementedEchoServer struct{}
 
 func (UnimplementedEchoServer) Echo(context.Context, *EchoMessage) (*EchoMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+}
+func (UnimplementedEchoServer) EchoN(*EchoNMessage, grpc.ServerStreamingServer[EchoNMessage]) error {
+	return status.Errorf(codes.Unimplemented, "method EchoN not implemented")
 }
 func (UnimplementedEchoServer) mustEmbedUnimplementedEchoServer() {}
 func (UnimplementedEchoServer) testEmbeddedByValue()              {}
@@ -106,6 +129,17 @@ func _Echo_Echo_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Echo_EchoN_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(EchoNMessage)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(EchoServer).EchoN(m, &grpc.GenericServerStream[EchoNMessage, EchoNMessage]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Echo_EchoNServer = grpc.ServerStreamingServer[EchoNMessage]
+
 // Echo_ServiceDesc is the grpc.ServiceDesc for Echo service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -118,6 +152,12 @@ var Echo_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Echo_Echo_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "EchoN",
+			Handler:       _Echo_EchoN_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "services/echo/echo.proto",
 }
