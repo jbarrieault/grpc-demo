@@ -7,7 +7,14 @@ import (
 
 type MemoryRegistry struct {
 	services map[string]*Service
-	mu       sync.Mutex
+	mu       sync.RWMutex
+}
+
+func (r *MemoryRegistry) Services() map[string]*Service {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	return r.services
 }
 
 func NewRegistery() *MemoryRegistry {
@@ -18,28 +25,29 @@ func NewRegistery() *MemoryRegistry {
 
 type Service struct {
 	Name      string
-	Addresses []Address
+	addresses []string
 	r         *MemoryRegistry
-	mu        sync.Mutex
+	mu        sync.RWMutex
 }
 
-type Address string
+func (r *MemoryRegistry) newService(name string, addresses ...string) *Service {
+	return &Service{r: r, Name: name, addresses: addresses}
+}
 
-func (r *MemoryRegistry) newService(name string, addrs ...string) *Service {
-	addresses := make([]Address, len(addrs))
-	for i, addr := range addrs {
-		addresses[i] = Address(addr)
-	}
+func (s *Service) Addresses() []string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
-	s := Service{r: r, Name: name, Addresses: addresses}
-
-	return &s
+	addresses := make([]string, len(s.addresses))
+	copy(addresses, s.addresses)
+	return addresses
 }
 
 func (r *MemoryRegistry) Register(name string, addrs ...string) error {
-	s := r.newService(name, addrs...)
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	s := r.newService(name, addrs...)
 
 	_, ok := r.services[s.Name]
 	if !ok {
@@ -75,30 +83,27 @@ func (s *Service) AddAddress(addr string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	for _, a := range s.Addresses {
-		if string(a) == addr {
+	for _, a := range s.addresses {
+		if a == addr {
 			return fmt.Errorf("%s is already registered", addr)
 		}
 	}
 
-	s.Addresses = append(s.Addresses, Address(addr))
+	s.addresses = append(s.addresses, addr)
 
 	return nil
 }
 
-func (s *Service) RemoveAddress(addr string) error {
-	address := Address(addr)
+func (s *Service) RemoveAddress(address string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	for i, a := range s.Addresses {
+	for i, a := range s.addresses {
 		if a == address {
-			s.Addresses = append(s.Addresses[:i], s.Addresses[i+1:]...)
+			s.addresses = append(s.addresses[:i], s.addresses[i+1:]...)
 			return nil
 		}
 	}
 
-	return fmt.Errorf("%s is not registered", addr)
+	return fmt.Errorf("%s is not registered", address)
 }
-
-// TODO: add a way to interact with the service using a unix socket
