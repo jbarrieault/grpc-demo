@@ -2,6 +2,9 @@ package main
 
 import (
 	"flag"
+	"log"
+	"net"
+	"time"
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
@@ -25,6 +28,10 @@ func (c *echoServer) EchoN(message *pb.EchoNMessage, stream grpc.ServerStreaming
 		if err != nil {
 			return err
 		}
+
+		if i < int(message.N)-1 {
+			time.Sleep(time.Duration(1) * time.Second)
+		}
 	}
 
 	return nil
@@ -32,4 +39,18 @@ func (c *echoServer) EchoN(message *pb.EchoNMessage, stream grpc.ServerStreaming
 
 func main() {
 	flag.Parse()
+
+	listner, err := net.Listen("tcp", ":"+*port)
+	if err != nil {
+		log.Fatalf("net.Listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterEchoServer(s, &echoServer{})
+
+	log.Printf("Streaming Echo Server listening on port %v", *port)
+	err = s.Serve(listner)
+	if err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
