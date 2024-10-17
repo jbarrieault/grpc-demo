@@ -12,15 +12,14 @@ import (
 	"syscall"
 	"time"
 
-	mr "github.com/jbarrieault/grpc-demo/unary-echo-client/pkg/memory_registry"
-
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
+	mr "github.com/jbarrieault/grpc-demo/unary-echo-client/pkg/memory_registry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
-	addr          = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s) address, as host:post")
+	addr          = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s), as host:port")
 	serviceConfig = `{
 			"methodConfig": [{
 				"name": [{"service": "echo.Echo"}],
