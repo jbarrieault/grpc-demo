@@ -35,12 +35,12 @@ Enter some messages and you will see responses coming from each server in round-
 
 - [X] build an (in-memory) service registry
 - [X] create a non-static resolver using a service registry
-- [ ] extract service to its own module/process, exposed over unix socket
+- [ ] extract service to its own module/process (exposed over unix socket?)
   - [ ] implement notifications that push to connected clients on service state changes
   - [ ] auto-register unary-echo-server instances to the registry
   - [ ] why not hand-roll a binary protocol for transport while we're at it?
-- [ ] auth?
-- [ ] streaming server/client demo
+- [ ] explore auth
+- [X] streaming server/client demo
 - [ ] explore observability/metrics
 - [ ] a ruby client
 - [ ] demo proto schema evolution
