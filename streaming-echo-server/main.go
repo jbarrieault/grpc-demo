@@ -21,6 +21,7 @@ type echoServer struct {
 // EchoN streams the message.Value, message.N times,
 // N is incremented on each successive streamed *EchoMessage.
 func (c *echoServer) EchoN(message *pb.EchoNMessage, stream grpc.ServerStreamingServer[pb.EchoNMessage]) error {
+	log.Printf("EchoN recevied: %s (N=%d)", message.Value, message.N)
 	var err error
 	for i := 0; i < int(message.N); i++ {
 		m := &pb.EchoNMessage{N: int32(i), Value: message.Value}
