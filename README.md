@@ -55,6 +55,7 @@ go run .
 When the client sends a message, you will see a stream of responses.
 Multiple messages can be sent in short succession, which results in the interleaving of response stream messages.
 
+<img width="616" alt="image" src="https://github.com/user-attachments/assets/9c405969-3fdf-4dd7-865d-5926978bd91e">
 
 ## TODO
 
