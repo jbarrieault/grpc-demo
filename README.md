@@ -61,13 +61,15 @@ Multiple messages can be sent in short succession, which results in the interlea
 
 - [X] build an (in-memory) service registry
 - [X] create a non-static resolver using a service registry
-- [ ] extract service to its own module/process (exposed over unix socket?)
+  - [ ] extract to its own module/process (exposed over unix socket?)
   - [ ] implement notifications that push to connected clients on service state changes
   - [ ] auto-register unary-echo-server instances to the registry
   - [ ] why not hand-roll a binary protocol for transport while we're at it?
 - [ ] explore TLS/mTLS
 - [ ] explore auth
-- [X] streaming server/client demo
+- [X] streaming server demo
+- [ ] streaming client demo
+- [ ] streaming bi-di demo
 - [ ] explore observability/metrics
 - [ ] a ruby client
 - [ ] demo proto schema evolution
