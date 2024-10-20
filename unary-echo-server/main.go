@@ -7,11 +7,13 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"path/filepath"
 	"time"
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -50,7 +52,24 @@ func main() {
 		log.Fatalf("net.Listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	cert, err := filepath.Abs("../tls/grpc-server.crt")
+	if err != nil {
+		log.Fatalf("failed to build cert path: %v", err)
+	}
+
+	pkey, err := filepath.Abs("../tls/grpc-server.key")
+	if err != nil {
+		log.Fatalf("failed to build private key path: %v", err)
+	}
+
+	creds, err := credentials.NewServerTLSFromFile(cert, pkey)
+	if err != nil {
+		log.Fatalf("failed to create server credentials: %v", err)
+	}
+
+	credsServerOpt := grpc.Creds(creds)
+
+	s := grpc.NewServer(credsServerOpt)
 	pb.RegisterEchoServer(s, &echoServer{})
 
 	log.Printf("Echo Service listening on port %v", *port)
