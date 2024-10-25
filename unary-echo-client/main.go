@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -15,7 +16,7 @@ import (
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	mr "github.com/jbarrieault/grpc-demo/unary-echo-client/pkg/memory_registry"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -33,7 +34,8 @@ var (
 			}],
 			"loadBalancingConfig": [{"round_robin":{}}]
 		}`
-	mem_reg *mr.MemoryRegistry
+	serverName = "server.grpc-demo.example.com"
+	mem_reg    *mr.MemoryRegistry
 )
 
 func init() {
@@ -46,7 +48,18 @@ func init() {
 
 func main() {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	cert, err := filepath.Abs("../tls/grpc-ca.crt")
+	if err != nil {
+		log.Fatalf("failed to build CA cert path")
+	}
+
+	creds, err := credentials.NewClientTLSFromFile(cert, serverName)
+	if err != nil {
+		log.Fatalf("failed to load TLS credentials: %v", err)
+	}
+
+	opts = append(opts, grpc.WithTransportCredentials(creds))
 	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
 	opts = append(opts, grpc.WithDefaultServiceConfig(serviceConfig))
 

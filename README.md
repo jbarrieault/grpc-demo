@@ -65,7 +65,7 @@ Multiple messages can be sent in short succession, which results in the interlea
   - [ ] implement notifications that push to connected clients on service state changes
   - [ ] auto-register unary-echo-server instances to the registry
   - [ ] why not hand-roll a binary protocol for transport while we're at it?
-- [ ] explore TLS/mTLS
+- [/] explore TLS/mTLS
 - [ ] explore auth
 - [X] streaming server demo
 - [ ] streaming client demo
