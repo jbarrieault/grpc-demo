@@ -16,10 +16,11 @@ openssl req -x509 -new -nodes -key grpc-ca.key -sha256 -days 365 -out grpc-ca.cr
 Then, generate a key & cert signing request for the gRPC server:
 ```
 openssl genrsa -out grpc-server.key 2048
-openssl req -new -key grpc-server.key -out grpc-server.csr -subj "/CN=gRPC Demo Server"
+
+openssl req -new -key grpc-server.key -out grpc-server.csr -config grpc-server.cnf
 ```
 
 Finally, generate the server's cert by having the CA sign the CSR:
 ```
-openssl x509 -req -in grpc-server.csr -CA grpc-ca.crt -CAkey grpc-ca.key -CAcreateserial -out grpc-server.crt -days 365 -sha256
+openssl x509 -req -in grpc-server.csr -CA grpc-ca.crt -CAkey grpc-ca.key -CAcreateserial -out grpc-server.crt -days 365 -sha256 -extfile grpc-server.cnf -extensions req_ext
 ```
