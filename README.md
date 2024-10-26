@@ -19,6 +19,8 @@ The unary echo client/server demo a simple call-response model, configured with 
 - A back-off retry policy
 - mTLS
 
+Be sure to follow the [instructions](./tls/README.md) to set up the required keys & SSL certificates.
+
 Start multiple instance of the echo service:
 ```shell
 cd unary-echo-server
