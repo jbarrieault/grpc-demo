@@ -3,4 +3,4 @@ unary-echo-server/unary-echo-server
 streaming-echo-server/streaming-echo-server
 tls/*
 !tls/encryption.md
-!tls/grpc-server.cnf
+!tls/*.cnf
