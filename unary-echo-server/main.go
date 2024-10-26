@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -52,28 +55,53 @@ func main() {
 		log.Fatalf("net.Listen: %v", err)
 	}
 
-	cert, err := filepath.Abs("../tls/grpc-server.crt")
-	if err != nil {
-		log.Fatalf("failed to build cert path: %v", err)
-	}
-
-	pkey, err := filepath.Abs("../tls/grpc-server.key")
-	if err != nil {
-		log.Fatalf("failed to build private key path: %v", err)
-	}
-
-	creds, err := credentials.NewServerTLSFromFile(cert, pkey)
-	if err != nil {
-		log.Fatalf("failed to create server credentials: %v", err)
-	}
-
-	credsServerOpt := grpc.Creds(creds)
-
-	s := grpc.NewServer(credsServerOpt)
+	s := grpc.NewServer(buildTlsConfig())
 	pb.RegisterEchoServer(s, &echoServer{})
 
 	log.Printf("Echo Service listening on port %v", *port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func buildTlsConfig() grpc.ServerOption {
+	crtPath, err := filepath.Abs("../tls/grpc-server.crt")
+	if err != nil {
+		log.Fatalf("failed to build crt file path: %v", err)
+	}
+
+	keyPath, err := filepath.Abs("../tls/grpc-server.key")
+	if err != nil {
+		log.Fatalf("failed to build key path: %v", err)
+	}
+
+	serverCert, err := tls.LoadX509KeyPair(crtPath, keyPath)
+	if err != nil {
+		log.Fatalf("failed to load key pair: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+
+	caPath, err := filepath.Abs("../tls/grpc-ca.crt")
+	if err != nil {
+		log.Fatalf("failed to build CA path: %v", err)
+	}
+
+	caCert, err := os.ReadFile(caPath)
+	if err != nil {
+		log.Fatalf("failed to read CA file: %v", err)
+	}
+
+	ok := certPool.AppendCertsFromPEM(caCert)
+	if !ok {
+		log.Fatalf("failed to add CA cert to the pool. Is %s a PEM file?", caPath)
+	}
+
+	creds := credentials.NewTLS(&tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
+	})
+
+	return grpc.Creds(creds)
 }
