@@ -17,6 +17,7 @@ The unary echo client/server demo a simple call-response model, configured with 
 - An interceptor (provides logging, and decorates the response)
 - A Service address resolver
 - A back-off retry policy
+- mTLS
 
 Start multiple instance of the echo service:
 ```shell
@@ -65,7 +66,7 @@ Multiple messages can be sent in short succession, which results in the interlea
   - [ ] implement notifications that push to connected clients on service state changes
   - [ ] auto-register unary-echo-server instances to the registry
   - [ ] why not hand-roll a binary protocol for transport while we're at it?
-- [/] explore TLS/mTLS
+- [X] explore TLS/mTLS
 - [ ] explore auth
 - [X] streaming server demo
 - [ ] streaming client demo

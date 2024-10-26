@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"log"
@@ -49,17 +51,7 @@ func init() {
 func main() {
 	var opts []grpc.DialOption
 
-	cert, err := filepath.Abs("../tls/grpc-ca.crt")
-	if err != nil {
-		log.Fatalf("failed to build CA cert path")
-	}
-
-	creds, err := credentials.NewClientTLSFromFile(cert, serverName)
-	if err != nil {
-		log.Fatalf("failed to load TLS credentials: %v", err)
-	}
-
-	opts = append(opts, grpc.WithTransportCredentials(creds))
+	opts = append(opts, grpc.WithTransportCredentials(buildTlsConfig()))
 	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
 	opts = append(opts, grpc.WithDefaultServiceConfig(serviceConfig))
 
@@ -91,6 +83,48 @@ func main() {
 
 		fmt.Println(output)
 	}
+}
+
+func buildTlsConfig() credentials.TransportCredentials {
+	crtPath, err := filepath.Abs("../tls/grpc-client.crt")
+	if err != nil {
+		log.Fatalf("failed to build crt file path: %v", err)
+	}
+
+	keyPath, err := filepath.Abs("../tls/grpc-client.key")
+	if err != nil {
+		log.Fatalf("failed to build key path: %v", err)
+	}
+
+	cert, err := tls.LoadX509KeyPair(crtPath, keyPath)
+	if err != nil {
+		log.Fatalf("failed to load client cert: %v", err)
+	}
+
+	certPool := x509.NewCertPool()
+
+	caCrtPath, err := filepath.Abs("../tls/grpc-ca.crt")
+	if err != nil {
+		log.Fatalf("failed to build CA path: %v", err)
+	}
+
+	caCrt, err := os.ReadFile(caCrtPath)
+	if err != nil {
+		log.Fatalf("failed to read CA crt file: %v", err)
+	}
+
+	ok := certPool.AppendCertsFromPEM(caCrt)
+	if !ok {
+		log.Fatalf("failed to add CA cert to the pool. Is %s a PEM file?", caCrtPath)
+	}
+
+	tlsConfig := &tls.Config{
+		ServerName:   serverName,
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      certPool,
+	}
+
+	return credentials.NewTLS(tlsConfig)
 }
 
 func echo(input string, message *pb.EchoMessage, client pb.EchoClient) (string, error) {

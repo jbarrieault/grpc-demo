@@ -89,7 +89,7 @@ func buildTlsConfig() grpc.ServerOption {
 
 	caCert, err := os.ReadFile(caPath)
 	if err != nil {
-		log.Fatalf("failed to read CA file: %v", err)
+		log.Fatalf("failed to read CA crt file: %v", err)
 	}
 
 	ok := certPool.AppendCertsFromPEM(caCert)
