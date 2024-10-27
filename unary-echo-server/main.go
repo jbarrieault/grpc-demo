@@ -11,12 +11,14 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -55,7 +57,7 @@ func main() {
 		log.Fatalf("net.Listen: %v", err)
 	}
 
-	s := grpc.NewServer(buildTlsConfig())
+	s := grpc.NewServer(buildTlsConfig(), buildUserAuthenticationConfig())
 	pb.RegisterEchoServer(s, &echoServer{})
 
 	log.Printf("Echo Service listening on port %v", *port)
@@ -104,4 +106,41 @@ func buildTlsConfig() grpc.ServerOption {
 	})
 
 	return grpc.Creds(creds)
+}
+
+func buildUserAuthenticationConfig() grpc.ServerOption {
+	return grpc.UnaryInterceptor(userAuthInterceptor)
+}
+
+func userAuthInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		log.Println("userAuthInterceptor: no metadata provided")
+		return nil, status.Errorf(codes.InvalidArgument, "missing authentication metadata")
+	}
+
+	vals := md.Get("authorization")
+	if len(vals) == 0 {
+		log.Println("userAuthInterceptor: no authorization metadadta provided")
+		return nil, status.Errorf(codes.Unauthenticated, "missing authorization metadata")
+	}
+
+	jwt := strings.TrimPrefix(vals[0], "Bearer ")
+
+	ok = validateJwt(jwt)
+	if !ok {
+		log.Printf("userAuthInterceptor: invalid token provided: '%v'", jwt)
+		return nil, status.Errorf(codes.Unauthenticated, "invalid token provided: '%v'", jwt)
+	}
+
+	ret, err := handler(ctx, req)
+	if err != nil {
+		log.Printf("RPC failed: %v", err)
+	}
+	return ret, nil
+}
+
+func validateJwt(jwt string) bool {
+	// using a hard-coded fake token for now
+	return jwt == "Bearer MY.FAKE.JWT"
 }

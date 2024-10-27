@@ -66,7 +66,7 @@ Multiple messages can be sent in short succession, which results in the interlea
   - [ ] extract to its own module
 - [X] create a non-static resolver using a service registry
 - [X] explore TLS/mTLS
-- [ ] explore auth
+- [/] jwt user auth
 - [X] streaming server demo
 - [ ] streaming client demo
 - [ ] streaming bi-di demo
