@@ -19,6 +19,7 @@ import (
 	mr "github.com/jbarrieault/grpc-demo/unary-echo-client/pkg/memory_registry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -132,6 +133,9 @@ func echo(input string, message *pb.EchoMessage, client pb.EchoClient) (string, 
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
+	jwt := metadata.Pairs("Bearer", "MY.FAKE.JWT")
+	ctx = metadata.NewOutgoingContext(ctx, jwt)
 
 	resp, err := client.Echo(ctx, message)
 	if err != nil {
