@@ -70,6 +70,8 @@ Multiple messages can be sent in short succession, which results in the interlea
 - [X] streaming server demo
 - [ ] streaming client demo
 - [ ] streaming bi-di demo
-- [ ] explore observability/metrics
+- [ ] health checking
+- [ ] keepalive
+- [ ] observability/metrics
 - [ ] a ruby client
 - [ ] demo proto schema evolution
