@@ -63,11 +63,8 @@ Multiple messages can be sent in short succession, which results in the interlea
 ## TODO
 
 - [X] build an (in-memory) service registry
+  - [ ] extract to its own module
 - [X] create a non-static resolver using a service registry
-  - [ ] extract to its own module/process (exposed over unix socket?)
-  - [ ] implement notifications that push to connected clients on service state changes
-  - [ ] auto-register unary-echo-server instances to the registry
-  - [ ] why not hand-roll a binary protocol for transport while we're at it?
 - [X] explore TLS/mTLS
 - [ ] explore auth
 - [X] streaming server demo
