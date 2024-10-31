@@ -15,8 +15,8 @@ import (
 	"syscall"
 	"time"
 
+	mr "github.com/jbarrieault/grpc-demo/memory-registry"
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
-	mr "github.com/jbarrieault/grpc-demo/unary-echo-client/pkg/memory_registry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"

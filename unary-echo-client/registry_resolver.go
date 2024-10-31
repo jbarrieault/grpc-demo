@@ -1,7 +1,7 @@
 package main
 
 import (
-	mr "github.com/jbarrieault/grpc-demo/unary-echo-client/pkg/memory_registry"
+	mr "github.com/jbarrieault/grpc-demo/memory-registry"
 	"google.golang.org/grpc/resolver"
 )
 
