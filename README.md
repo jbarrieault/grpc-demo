@@ -2,6 +2,11 @@
 
 Trying out gRPC, that's it.
 
+> [!TIP]
+> These experimental programs resemble work in the [official examples](https://github.com/grpc/grpc-go/tree/master/examples).
+> If you want to learn gRPC, look there instead.
+
+
 ## Generating gRPC services
 
 The following re-generates the Echo service's gRPC service and protobuf code:
