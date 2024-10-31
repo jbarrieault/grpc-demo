@@ -14,7 +14,8 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 
 The unary echo client/server demo a simple call-response model, configured with some additional gRPC feaures:
 - Load-balancing (round robin)
-- An interceptor (provides logging, and decorates the response)
+- A logging & response decorating interceptor
+- A user authentication interceptor
 - A Service address resolver
 - A back-off retry policy
 - mTLS
@@ -62,11 +63,10 @@ Multiple messages can be sent in short succession, which results in the interlea
 
 ## TODO
 
-- [X] build an (in-memory) service registry
-  - [ ] extract to its own module
+- [X] build an (in-memory) service registry module
 - [X] create a non-static resolver using a service registry
 - [X] explore TLS/mTLS
-- [/] jwt user auth
+- [X] token based user auth interceptor
 - [X] streaming server demo
 - [ ] streaming client demo
 - [ ] streaming bi-di demo
