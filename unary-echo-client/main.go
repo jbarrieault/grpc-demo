@@ -134,7 +134,7 @@ func echo(input string, message *pb.EchoMessage, client pb.EchoClient) (string, 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	// using a hard-coded fake token for now
+	// using a hard-coded fake token
 	jwt := metadata.Pairs("authorization", "Bearer MY.FAKE.JWT")
 	ctx = metadata.NewOutgoingContext(ctx, jwt)
 

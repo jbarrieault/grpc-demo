@@ -141,6 +141,6 @@ func userAuthInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInf
 }
 
 func validateJwt(jwt string) bool {
-	// using a hard-coded fake token for now
-	return jwt == "Bearer MY.FAKE.JWT"
+	// using a hard-coded fake token
+	return jwt == "MY.FAKE.JWT"
 }
