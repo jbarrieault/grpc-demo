@@ -19,6 +19,7 @@ The unary echo client/server demo a simple call-response model, configured with 
 - A Service address resolver
 - A back-off retry policy
 - mTLS
+- Keepalive pings
 
 Be sure to follow the [instructions](./tls/README.md) to set up the required keys & SSL certificates.
 
@@ -68,10 +69,10 @@ Multiple messages can be sent in short succession, which results in the interlea
 - [X] explore TLS/mTLS
 - [X] token based user auth interceptor
 - [X] streaming server demo
+- [X] keepalive
+- [ ] health checking
 - [ ] streaming client demo
 - [ ] streaming bi-di demo
-- [ ] health checking
-- [ ] keepalive
 - [ ] observability/metrics
 - [ ] a ruby client
 - [ ] demo proto schema evolution

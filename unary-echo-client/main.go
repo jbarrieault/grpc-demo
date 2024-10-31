@@ -19,6 +19,7 @@ import (
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -39,6 +40,13 @@ var (
 		}`
 	serverName = "server.grpc-demo.example.com"
 	mem_reg    *mr.MemoryRegistry
+
+	// run with GODEBUG=http2debug=2 to see debug output that includes keepalive activity
+	kacp = keepalive.ClientParameters{
+		Time:                10 * time.Second, // ping every 10 seconds (while idling)
+		Timeout:             1 * time.Second,  // wait 1 second for ping ack
+		PermitWithoutStream: true,             // send pings even without active streams
+	}
 )
 
 func init() {
@@ -55,6 +63,7 @@ func main() {
 	opts = append(opts, grpc.WithTransportCredentials(buildTlsConfig()))
 	opts = append(opts, grpc.WithUnaryInterceptor(unaryLoggingInterceptor))
 	opts = append(opts, grpc.WithDefaultServiceConfig(serviceConfig))
+	opts = append(opts, grpc.WithKeepaliveParams(kacp))
 
 	// 'static://' scheme is handled by static_resolver, which uses a hard-coded list of addresses
 	// conn, err := grpc.NewClient("static:///this-part-doesnt-matter-because-the-static-resolver-is-static", opts...)
