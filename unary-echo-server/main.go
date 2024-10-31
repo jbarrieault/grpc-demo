@@ -29,8 +29,11 @@ var (
 	slowRate = flag.Int("s", 0, "percentage of (non error) calls that be slow")
 
 	kaep = keepalive.EnforcementPolicy{
-		MinTime:             10 * time.Second, // terminate client connections if they ping more often than 15s
+		MinTime:             10 * time.Second, // terminate client connections if they ping more often than 10s
 		PermitWithoutStream: true,             // Allow pings even when there are no active streams
+	}
+	kasp = keepalive.ServerParameters{
+		MaxConnectionIdle: 10 * time.Second, // how long an idle connection can exist before terminating
 	}
 )
 
@@ -63,7 +66,7 @@ func main() {
 		log.Fatalf("net.Listen: %v", err)
 	}
 
-	s := grpc.NewServer(buildTlsConfig(), buildUserAuthenticationConfig(), grpc.KeepaliveEnforcementPolicy(kaep))
+	s := grpc.NewServer(buildTlsConfig(), buildUserAuthenticationConfig(), grpc.KeepaliveEnforcementPolicy(kaep), grpc.KeepaliveParams(kasp))
 	pb.RegisterEchoServer(s, &echoServer{})
 
 	log.Printf("Echo Service listening on port %v", *port)

@@ -43,7 +43,7 @@ var (
 
 	// run with GODEBUG=http2debug=2 to see debug output that includes keepalive activity
 	kacp = keepalive.ClientParameters{
-		Time:                10 * time.Second, // ping every 10 seconds (while idling)
+		Time:                15 * time.Second, // ping every 10 seconds (while idling)
 		Timeout:             1 * time.Second,  // wait 1 second for ping ack
 		PermitWithoutStream: true,             // send pings even without active streams
 	}
