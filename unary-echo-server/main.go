@@ -29,11 +29,18 @@ var (
 	slowRate = flag.Int("s", 0, "percentage of (non error) calls that be slow")
 
 	kaep = keepalive.EnforcementPolicy{
-		MinTime:             10 * time.Second, // terminate client connections if they ping more often than 10s
-		PermitWithoutStream: true,             // Allow pings even when there are no active streams
+		MinTime:             5 * time.Second, // terminate client connections if they ping more often than 10s
+		PermitWithoutStream: true,            // Allow pings even when there are no active streams
 	}
+
+	// Note about keepalive: Ping activity only acts to keep _idle_ connections alive.
+	// A client is considered idle based on RPC call activity, which does not include ping activity.
 	kasp = keepalive.ServerParameters{
-		MaxConnectionIdle: 10 * time.Second, // how long an idle connection can exist before terminating
+		MaxConnectionIdle:     15 * time.Second, // If a client is idle for 15 seconds, send a GOAWAY
+		MaxConnectionAge:      30 * time.Second, // If any connection is alive for more than 30 seconds, send a GOAWAY
+		MaxConnectionAgeGrace: 5 * time.Second,  // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
+		Time:                  5 * time.Second,  // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+		Timeout:               1 * time.Second,  // Wait 1 second for the ping ack before assuming the connection is dead
 	}
 )
 

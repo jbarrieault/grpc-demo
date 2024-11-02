@@ -24,7 +24,9 @@ import (
 )
 
 var (
-	addr          = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s), as host:port")
+	addr = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s), as host:port")
+	// NOTE: The loadBalancingConfig somehow interfereces with keepalive connection closing
+	// With this config in place, the client ignores GOAWAY frames form the serverand continues PINGing... :(
 	serviceConfig = `{
 			"methodConfig": [{
 				"name": [{"service": "echo.Echo"}],
@@ -36,16 +38,16 @@ var (
 					"RetryableStatusCodes": [ "UNAVAILABLE" ]
 				}
 			}],
-			"loadBalancingConfig": [{"round_robin":{}}]
+		  "loadBalancingConfig": [{"round_robin":{}}]
 		}`
 	serverName = "server.grpc-demo.example.com"
 	mem_reg    *mr.MemoryRegistry
 
 	// run with GODEBUG=http2debug=2 to see debug output that includes keepalive activity
 	kacp = keepalive.ClientParameters{
-		Time:                15 * time.Second, // ping every 10 seconds (while idling)
-		Timeout:             1 * time.Second,  // wait 1 second for ping ack
-		PermitWithoutStream: true,             // send pings even without active streams
+		Time:                5 * time.Second, // ping every 5 seconds while idle (idleness = no active RPC calls)
+		Timeout:             1 * time.Second, // wait 1 second for ping ack
+		PermitWithoutStream: true,            // send pings even without active streams
 	}
 )
 
