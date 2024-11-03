@@ -18,6 +18,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health"
+	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -74,7 +76,21 @@ func main() {
 	}
 
 	s := grpc.NewServer(buildTlsConfig(), buildUserAuthenticationConfig(), grpc.KeepaliveEnforcementPolicy(kaep), grpc.KeepaliveParams(kasp))
+	healthCheckServer := health.NewServer()
+	healthgrpc.RegisterHealthServer(s, healthCheckServer)
 	pb.RegisterEchoServer(s, &echoServer{})
+
+	// after 5 seconds become unhealthy for 10 seconds, then become healthy again
+	go func() {
+		time.Sleep(5 * time.Second)
+		system := "" // I believe this indicates _all_ registered services.
+		healthCheckServer.SetServingStatus(system, healthgrpc.HealthCheckResponse_NOT_SERVING)
+		log.Printf("System health status changed to %v", healthgrpc.HealthCheckResponse_NOT_SERVING)
+
+		time.Sleep(10 * time.Second)
+		healthCheckServer.SetServingStatus(system, healthgrpc.HealthCheckResponse_SERVING)
+		log.Printf("System health status changed to %v", healthgrpc.HealthCheckResponse_SERVING)
+	}()
 
 	log.Printf("Echo Service listening on port %v", *port)
 	if err := s.Serve(lis); err != nil {

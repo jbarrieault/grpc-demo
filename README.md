@@ -75,7 +75,7 @@ Multiple messages can be sent in short succession, which results in the interlea
 - [X] token based user auth interceptor
 - [X] streaming server demo
 - [X] keepalive
-- [ ] health checking
+- [/] health checking
 - [ ] streaming client demo
 - [ ] streaming bi-di demo
 - [ ] observability/metrics

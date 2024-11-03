@@ -19,6 +19,7 @@ import (
 	pb "github.com/jbarrieault/grpc-demo/services/echo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	_ "google.golang.org/grpc/health"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 )
@@ -27,6 +28,7 @@ var (
 	addr = flag.String("addr", "localhost:3000", "Comma separated list of remote server(s), as host:port")
 	// NOTE: The loadBalancingConfig somehow interfereces with keepalive connection closing
 	// With this config in place, the client ignores GOAWAY frames form the serverand continues PINGing... :(
+	// I was able to reproduce in the official Go examples as well. I'm moving on.
 	serviceConfig = `{
 			"methodConfig": [{
 				"name": [{"service": "echo.Echo"}],
@@ -38,7 +40,8 @@ var (
 					"RetryableStatusCodes": [ "UNAVAILABLE" ]
 				}
 			}],
-		  "loadBalancingConfig": [{"round_robin":{}}]
+		  "loadBalancingConfig": [{"round_robin":{}}],
+			"healthCheckConfig": { "serviceName": "" }
 		}`
 	serverName = "server.grpc-demo.example.com"
 	mem_reg    *mr.MemoryRegistry
@@ -89,7 +92,7 @@ func main() {
 		output, err := echo(input, &message, client)
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Println(err)
 			continue
 		}
 
@@ -142,7 +145,7 @@ func buildTlsConfig() credentials.TransportCredentials {
 func echo(input string, message *pb.EchoMessage, client pb.EchoClient) (string, error) {
 	message.Value = input
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// using a hard-coded fake token
